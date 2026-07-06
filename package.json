@@ -1,0 +1,15 @@
+{
+  "name": "e2ed-remote",
+  "version": "1.0.0",
+  "description": "Discord user-installed app (My Apps bot) for encrypting and decrypting e2ed messages",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.4",
+    "dotenv": "^16.4.5"
+  }
+}
