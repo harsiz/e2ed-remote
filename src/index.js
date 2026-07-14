@@ -164,7 +164,7 @@ async function handleEncryptModal(interaction) {
 
     await interaction.reply({
         content: ciphertext,
-        embeds: [encryptedEmbed()],
+        embeds: [encryptedEmbed(ciphertext)],
         flags: MessageFlags.Ephemeral
     });
 }
@@ -193,7 +193,7 @@ async function runDecrypt(interaction) {
         const plaintext = decrypt(password, channelId, text);
         await interaction.reply({
             content: plaintext.length > 0 ? plaintext.slice(0, DISCORD_CONTENT_LIMIT) : undefined,
-            embeds: [decryptedEmbed(plaintext.length === 0)],
+            embeds: [decryptedEmbed(plaintext)],
             flags: MessageFlags.Ephemeral
         });
     } catch (error) {

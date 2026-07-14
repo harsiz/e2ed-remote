@@ -6,27 +6,37 @@ const COLORS = {
     info: 0x5865f2
 };
 
-// The actual ciphertext/plaintext is sent as plain message content (not in the
-// embed), so on mobile a single long press plus "Copy Text" grabs exactly that
-// string with no markdown, code fences, or embed chrome mixed in.
+// The text also goes in the reply's plain message content (see index.js), so
+// on mobile a single long press plus "Copy Text" grabs exactly that string.
+// The embed description repeats it in a monospace code block for desktop,
+// where a click-drag selection copies just the rendered text, no fences
+// included, and the monospace font makes look-alike characters (0/O, 1/l/I)
+// unambiguous. Description (4096 chars) is used instead of a field (1024
+// chars) since encrypted text can run past a field's limit.
 
-function encryptedEmbed() {
+function encryptedEmbed(ciphertext) {
     return new EmbedBuilder()
         .setColor(COLORS.success)
         .setTitle("Message encrypted")
         .setDescription(
-            "The encrypted text is above. Long press it and choose Copy Text, then paste it into the channel."
+            "Mobile: long press the text above and choose Copy Text.\n" +
+                "Desktop: select and copy the code block below.\n" +
+                "Paste it into the channel.\n\n" +
+                "```\n" + ciphertext + "\n```"
         );
 }
 
-function decryptedEmbed(isEmpty) {
+function decryptedEmbed(plaintext) {
+    const isEmpty = plaintext.length === 0;
     return new EmbedBuilder()
         .setColor(COLORS.success)
         .setTitle("Message decrypted")
         .setDescription(
             isEmpty
                 ? "The original message was empty."
-                : "The decrypted text is above. Long press it and choose Copy Text if you want to save it."
+                : "Mobile: long press the text above and choose Copy Text.\n" +
+                      "Desktop: select and copy the code block below.\n\n" +
+                      "```\n" + plaintext + "\n```"
         );
 }
 
