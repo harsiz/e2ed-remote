@@ -18,6 +18,8 @@ See [src/crypto.js](src/crypto.js) for the implementation, ported from [vencord/
 
 Passwords are always collected through a modal form, never as a visible slash command argument, so they never show up in the public "user used /command" line.
 
+This app is built for mobile, since PC users already have BetterDiscord, Vencord, or the Chrome extension. Every reply puts the encrypted or decrypted text as the plain message text (not inside an embed or a code block), so on mobile a single long press on the reply plus Copy Text grabs exactly that string, with nothing else attached, ready to paste. To keep it fitting in one Discord message, `/encrypt` messages are capped at 1200 characters.
+
 ## Setup
 
 1. Create an application at the [Discord Developer Portal](https://discord.com/developers/applications).

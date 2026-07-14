@@ -19,6 +19,14 @@ const FIELD_MESSAGE = "message";
 const FIELD_TEXT = "text";
 const FIELD_PASSWORD = "password";
 
+// Discord message content is capped at 2000 characters. The ciphertext goes
+// straight into the reply's content (not an embed), so it stays a single
+// clean long-press-and-copy on mobile. AES-GCM adds a 12 byte iv and 16 byte
+// tag, and base64url expands that by 4/3, so this cap keeps the encrypted
+// output comfortably under 2000 even for worst-case multi-byte UTF-8 input.
+const MAX_MESSAGE_LENGTH = 1200;
+const DISCORD_CONTENT_LIMIT = 2000;
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once("ready", () => {
@@ -55,7 +63,7 @@ async function handleEncryptCommand(interaction) {
         .setCustomId(FIELD_MESSAGE)
         .setLabel("Message to encrypt")
         .setStyle(TextInputStyle.Paragraph)
-        .setMaxLength(3500)
+        .setMaxLength(MAX_MESSAGE_LENGTH)
         .setRequired(true);
 
     const passwordInput = new TextInputBuilder()
@@ -142,7 +150,23 @@ async function handleEncryptModal(interaction) {
 
     const ciphertext = encrypt(password, channelId, message);
 
-    await interaction.reply({ embeds: [encryptedEmbed(ciphertext)], flags: MessageFlags.Ephemeral });
+    if (ciphertext.length > DISCORD_CONTENT_LIMIT) {
+        return interaction.reply({
+            embeds: [
+                errorEmbed(
+                    "Message too long",
+                    "The encrypted result does not fit in a single Discord message. Try a shorter message."
+                )
+            ],
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    await interaction.reply({
+        content: ciphertext,
+        embeds: [encryptedEmbed()],
+        flags: MessageFlags.Ephemeral
+    });
 }
 
 async function handleDecryptModal(interaction) {
@@ -167,7 +191,11 @@ async function runDecrypt(interaction) {
 
     try {
         const plaintext = decrypt(password, channelId, text);
-        await interaction.reply({ embeds: [decryptedEmbed(plaintext)], flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+            content: plaintext.length > 0 ? plaintext.slice(0, DISCORD_CONTENT_LIMIT) : undefined,
+            embeds: [decryptedEmbed(plaintext.length === 0)],
+            flags: MessageFlags.Ephemeral
+        });
     } catch (error) {
         await interaction.reply({
             embeds: [

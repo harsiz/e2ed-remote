@@ -6,19 +6,28 @@ const COLORS = {
     info: 0x5865f2
 };
 
-function encryptedEmbed(ciphertext) {
+// The actual ciphertext/plaintext is sent as plain message content (not in the
+// embed), so on mobile a single long press plus "Copy Text" grabs exactly that
+// string with no markdown, code fences, or embed chrome mixed in.
+
+function encryptedEmbed() {
     return new EmbedBuilder()
         .setColor(COLORS.success)
         .setTitle("Message encrypted")
-        .setDescription("Paste this into the channel. Only someone with the password can decrypt it.")
-        .addFields({ name: "Encrypted text", value: "```\n" + ciphertext + "\n```" });
+        .setDescription(
+            "The encrypted text is above. Long press it and choose Copy Text, then paste it into the channel."
+        );
 }
 
-function decryptedEmbed(plaintext) {
+function decryptedEmbed(isEmpty) {
     return new EmbedBuilder()
         .setColor(COLORS.success)
         .setTitle("Message decrypted")
-        .addFields({ name: "Plaintext", value: plaintext.slice(0, 1024) || "(empty message)" });
+        .setDescription(
+            isEmpty
+                ? "The original message was empty."
+                : "The decrypted text is above. Long press it and choose Copy Text if you want to save it."
+        );
 }
 
 function errorEmbed(title, description) {
